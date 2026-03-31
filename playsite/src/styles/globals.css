@@ -546,3 +546,35 @@ body {
   color: var(--text-dim);
   border-top: 1px solid var(--border);
 }
+
+/* ─── Live command description bar ───────────────────────────────────────── */
+.cmd-desc-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(0, 229, 160, 0.04);
+  border-top: 1px solid rgba(0, 229, 160, 0.12);
+  border-bottom: 1px solid rgba(0, 229, 160, 0.12);
+}
+.cmd-desc-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.cmd-desc-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.cmd-desc-title {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.cmd-desc-body {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
