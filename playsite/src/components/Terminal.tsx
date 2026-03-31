@@ -20,7 +20,6 @@ const CHIPS = [
   "docker ps -a --filter status=exited",
 ];
 
-// Simple descriptions for subcommands
 const COMMAND_DESCRIPTIONS: Record<string, { title: string; desc: string; icon: string }> = {
   run:     { icon: "▶", title: "docker run",     desc: "Create and start a new container from an image." },
   build:   { icon: "🔨", title: "docker build",   desc: "Build a Docker image from a Dockerfile." },
@@ -71,7 +70,6 @@ function getCommandInfo(raw: string) {
   const trimmed = raw.trim().toLowerCase();
   if (!trimmed) return null;
 
-  // Strip leading 'docker' keyword
   const stripped = trimmed.startsWith("docker") ? trimmed.slice(6).trim() : trimmed;
   if (!stripped) return null;
 
@@ -106,43 +104,62 @@ export default function Terminal({
         ".chip",
         { opacity: 0, y: 10, scale: 0.9 },
         {
-          opacity: 1, y: 0, scale: 1,
-          stagger: 0.07, delay: 0.4, duration: 0.4,
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          stagger: 0.07,
+          delay: 0.4,
+          duration: 0.4,
           ease: "back.out(1.5)",
         }
       );
     });
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+    };
   }, []);
 
-  // Blinking cursor
   useEffect(() => {
     if (!cursorRef.current) return;
+
     const tl = gsap.to(cursorRef.current, {
-      opacity: 0, duration: 0.5, repeat: -1, yoyo: true, ease: "steps(1)",
+      opacity: 0,
+      duration: 0.5,
+      repeat: -1,
+      yoyo: true,
+      ease: "steps(1)",
     });
-    return () => tl.kill();
+
+    return () => {
+      tl.kill();
+    };
   }, []);
 
-  // Animate description box when command changes
   useEffect(() => {
     if (!descRef.current) return;
     const info = getCommandInfo(command);
     if (!info) return;
+
     gsap.fromTo(
       descRef.current,
       { opacity: 0, y: 6 },
       { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
     );
-  }, [command.split(/\s+/)[0]]); // only re-animate when subcommand changes
+  }, [command.split(/\s+/)[0]]);
 
   const handleKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       if (!loading && command.trim()) onSubmit();
     }
-    if (e.key === "ArrowUp") { e.preventDefault(); onNavigateHistory("up"); }
-    if (e.key === "ArrowDown") { e.preventDefault(); onNavigateHistory("down"); }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      onNavigateHistory("up");
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      onNavigateHistory("down");
+    }
   };
 
   const handleChip = (chip: string) => {
@@ -154,7 +171,6 @@ export default function Terminal({
 
   return (
     <div className="terminal-wrap" ref={containerRef}>
-      {/* Title bar */}
       <div className="terminal-titlebar">
         <span className="tb-dot tb-red" />
         <span className="tb-dot tb-yellow" />
@@ -162,7 +178,6 @@ export default function Terminal({
         <span className="tb-title">docker-playground — bash</span>
       </div>
 
-      {/* Input area */}
       <div className="terminal-body">
         <div className="prompt-line">
           <span className="prompt-user">user@docker</span>
@@ -171,6 +186,7 @@ export default function Terminal({
           <span className="prompt-dollar">$</span>
           <span className="prompt-cmd-prefix">docker</span>
         </div>
+
         <div className="input-row">
           <textarea
             ref={inputRef}
@@ -181,18 +197,16 @@ export default function Terminal({
             placeholder="run -d -p 8080:80 nginx"
             rows={2}
             spellCheck={false}
-            autoCapitalize="none"
-            autoCorrect="off"
             disabled={loading}
           />
           <span className="terminal-cursor" ref={cursorRef}>▌</span>
         </div>
+
         <div className="terminal-hint">
-          <kbd>Enter</kbd> to validate &nbsp;·&nbsp; <kbd>↑↓</kbd> history
+          <kbd>Enter</kbd> to validate · <kbd>↑↓</kbd> history
         </div>
       </div>
 
-      {/* Live command description */}
       {cmdInfo && (
         <div className="cmd-desc-bar" ref={descRef}>
           <span className="cmd-desc-icon">{cmdInfo.icon}</span>
@@ -203,7 +217,6 @@ export default function Terminal({
         </div>
       )}
 
-      {/* Submit */}
       <div className="terminal-footer">
         <button
           className={`btn-validate ${loading ? "btn-loading" : ""}`}
@@ -218,7 +231,6 @@ export default function Terminal({
         </button>
       </div>
 
-      {/* Quick-start chips */}
       <div className="chips-section">
         <span className="chips-label">Quick start:</span>
         <div className="chips-row">
