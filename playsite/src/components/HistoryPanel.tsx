@@ -55,7 +55,9 @@ export default function HistoryPanel({
 
       <div className="session-id">
         <span className="sid-label">Session</span>
-        <code className="sid-value">{sessionId.slice(0, 8)}…</code>
+        <code className="sid-value">
+          {sessionId ? sessionId.slice(0, 8) + "…" : "———"}
+        </code>
       </div>
 
       {history.length === 0 ? (

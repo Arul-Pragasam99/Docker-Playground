@@ -35,24 +35,31 @@ export function useDockerPlayground() {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const [sessionId] = useState<string>(() => {
-    if (typeof window === "undefined") return uuidv4();
-    const stored = sessionStorage.getItem("docker_session_id");
-    if (stored) return stored;
-    const id = uuidv4();
-    sessionStorage.setItem("docker_session_id", id);
-    return id;
-  });
+  const [sessionId, setSessionId] = useState<string>("");
 
   const commandBeforeNav = useRef("");
 
-  // Load history on mount
+  // Init sessionId on client only (avoids SSR/client hydration mismatch)
   useEffect(() => {
+    const stored = sessionStorage.getItem("docker_session_id");
+    if (stored) {
+      setSessionId(stored);
+    } else {
+      const id = uuidv4();
+      sessionStorage.setItem("docker_session_id", id);
+      setSessionId(id);
+    }
+  }, []);
+
+  // Load history once sessionId is ready
+  useEffect(() => {
+    if (!sessionId) return;
     fetchHistory();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   const fetchHistory = useCallback(async () => {
+    if (!sessionId) return;
     try {
       const res = await fetch(`/api/history?sessionId=${sessionId}`);
       if (!res.ok) return;
@@ -64,7 +71,7 @@ export function useDockerPlayground() {
   }, [sessionId]);
 
   const validate = useCallback(async () => {
-    if (!command.trim() || loading) return;
+    if (!command.trim() || loading || !sessionId) return;
     setLoading(true);
     setResult(null);
     setHistoryIndex(-1);
@@ -98,6 +105,7 @@ export function useDockerPlayground() {
   }, [command, loading, sessionId, fetchHistory]);
 
   const clearHistory = useCallback(async () => {
+    if (!sessionId) return;
     try {
       await fetch(`/api/history?sessionId=${sessionId}`, { method: "DELETE" });
       setHistory([]);
