@@ -96,7 +96,6 @@ body {
   letter-spacing: -0.02em;
   line-height: 1.1;
 }
-.whale { font-size: 1em; }
 .header-sub {
   color: var(--text-muted);
   font-size: 0.95rem;

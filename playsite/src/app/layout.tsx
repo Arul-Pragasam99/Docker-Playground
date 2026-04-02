@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "../styles/globals.css";
+import "@/styles/globals.css";
 
 export const metadata: Metadata = {
   title: "Docker Playground — Command Validator",
@@ -21,4 +21,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
-

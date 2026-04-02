@@ -73,16 +73,14 @@ export default function Home() {
         <div className="header-inner">
           <span className="header-badge">
             <span className="badge-dot" />
-            AI-Powered · Local Model
+            AI Powered
           </span>
-          <h1 className="header-title">
-            <span className="whale">🐳</span> Docker Playground
-          </h1>
+          <h1 className="header-title">Docker Playground</h1>
           <p className="header-sub">
             Paste any Docker command — get a full breakdown of every flag, typo checks, and pro tips.
           </p>
           <div className="stat-row">
-            {["50+ Commands", "Flag Breakdown", "Typo Detection", "Pro Tips"].map((s) => (
+            {["Flag Breakdown", "Typo Detection", "Pro Tips", "Session History"].map((s) => (
               <span key={s} className="stat-pill">
                 {s}
               </span>
@@ -119,7 +117,7 @@ export default function Home() {
       </main>
 
       <footer className="app-footer">
-        <span>Docker Playground · Local AI · No external APIs</span>
+        <span>Docker Playground · Command Validator</span>
       </footer>
     </div>
   );
