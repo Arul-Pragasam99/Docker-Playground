@@ -1,0 +1,25 @@
+FROM node:20-alpine
+
+RUN apk add --no-cache python3 py3-pip
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir --break-system-packages -r requirements.txt
+
+RUN python3 -c "import nltk; nltk.download('punkt', quiet=True); nltk.download('averaged_perceptron_tagger', quiet=True)"
+
+COPY . .
+
+RUN npm run build
+
+ENV NODE_ENV=production
+ENV PYTHON_AI_URL=http://localhost:5001
+ENV STORAGE_PROVIDER=local
+
+EXPOSE 3000 5001
+
+CMD python3 src/lib/ai/index.py & sleep 3 && node_modules/.bin/next start -p 3000
