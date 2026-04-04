@@ -4,6 +4,9 @@ import "../styles/globals.css";
 export const metadata: Metadata = {
   title: "Docker Playground — Command Validator",
   description: "Validate Docker commands and learn what every flag does",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
