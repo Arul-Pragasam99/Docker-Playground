@@ -62,7 +62,7 @@ export default function HistoryPanel({
 
       {history.length === 0 ? (
         <div className="history-empty">
-          <span className="empty-icon">🐳</span>
+          <span className="empty-icon"></span>
           <p>No commands yet.</p>
           <p className="empty-sub">Validated commands will appear here.</p>
         </div>
