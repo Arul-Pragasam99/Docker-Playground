@@ -2,10 +2,10 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import Terminal from "@/components/Terminal";
-import ResultCard from "@/components/ResultCard";
-import HistoryPanel from "@/components/HistoryPanel";
-import { useDockerPlayground } from "@/hooks/useDockerPlayground";
+import Terminal from "../components/Terminal";
+import ResultCard from "../components/ResultCard";
+import HistoryPanel from "../components/HistoryPanel";
+import { useDockerPlayground } from "../hooks/useDockerPlayground";
 
 export default function Home() {
   const headerRef = useRef<HTMLDivElement>(null);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getHistory, clearHistory } from "@/lib/db/storage";
+import { getHistory, clearHistory } from "../../lib/db/storage";
 
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get("sessionId");

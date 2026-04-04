@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveCommand } from "@/lib/db/storage";
+import { saveCommand } from "../../lib/db/storage";
 
 const PYTHON_AI_URL = process.env.PYTHON_AI_URL || "http://localhost:5001";
 
