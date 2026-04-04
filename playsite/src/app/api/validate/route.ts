@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveCommand } from "../../lib/db/storage";
+import { saveCommand } from "../../../lib/db/storage";
 
 const PYTHON_AI_URL = process.env.PYTHON_AI_URL || "http://localhost:5001";
 
@@ -17,7 +17,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Empty command" }, { status: 400 });
     }
 
-    // Call local Python AI service
     const aiResponse = await fetch(`${PYTHON_AI_URL}/validate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -31,7 +30,6 @@ export async function POST(req: NextRequest) {
 
     const result = await aiResponse.json();
 
-    // Persist to storage
     if (sessionId) {
       await saveCommand(sessionId, trimmed, result);
     }
