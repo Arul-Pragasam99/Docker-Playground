@@ -1,6 +1,6 @@
 # 🐳 Docker Playground — Command Validator
 
-A full-stack AI-powered web application that validates Docker commands, explains every flag in plain English, detects typos, and provides pro tips — all running locally with no external APIs.
+A full-stack AI-powered web application that validates Docker commands, explains every flag in plain English, detects typos, and provides pro tips.
 
 ---
 
@@ -18,6 +18,7 @@ A full-stack AI-powered web application that validates Docker commands, explains
 - [API Reference](#api-reference)
 - [Storage Options](#storage-options)
 - [Environment Variables](#environment-variables)
+- [Deployment on Render](#deployment-on-render)
 - [Common Errors & Fixes](#common-errors--fixes)
 - [File Reference](#file-reference)
 
@@ -33,7 +34,7 @@ Docker Playground lets you paste any Docker command and instantly get:
 - Pro tips per subcommand
 - Session history in a sidebar
 
-Everything runs locally. The AI engine is a Python Flask service using NLTK, NumPy, and a hand-curated knowledge base of 150+ flags and 50+ subcommands.
+The AI engine is a Python Flask service using NLTK, NumPy, scikit-learn, and a hand-curated knowledge base of 150+ flags and 50+ subcommands.
 
 ---
 
@@ -41,65 +42,67 @@ Everything runs locally. The AI engine is a Python Flask service using NLTK, Num
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend Framework | Next.js 14 (App Router) |
+| Frontend Framework | Next.js 16 (App Router) |
 | Language | TypeScript |
 | Animations | GSAP |
-| AI Engine | Python (Flask + NLTK + NumPy + scikit-learn) |
+| AI Engine | Python (Flask + NLTK + NumPy + scikit-learn + gunicorn) |
 | Fonts | JetBrains Mono, Space Grotesk |
 | Storage | In-memory (default) / MongoDB / Firebase |
+| Deployment | Render (Python + Next.js) |
 
 ---
 
 ## Project Structure
 
 ```
-playsite/
-├── Dockerfile
-├── requirements.txt              # Python dependencies
-├── package.json                  # Node dependencies
-├── .env.example                  # Environment variable template
-├── next.config.js
-├── tsconfig.json
-│
-└── src/
-    ├── app/
-    │   ├── layout.tsx            # Root HTML layout + fonts
-    │   ├── page.tsx              # Main page
-    │   └── api/
-    │       ├── validate/
-    │       │   └── route.ts      # POST /api/validate
-    │       └── history/
-    │           └── route.ts      # GET / DELETE /api/history
+Docker-Playground/
+└── playsite/
+    ├── Dockerfile
+    ├── requirements.txt              # Python dependencies
+    ├── package.json                  # Node dependencies
+    ├── next.config.js
+    ├── tsconfig.json
+    ├── .env.example                  # Environment variable template
     │
-    ├── components/
-    │   ├── Terminal.tsx          # Terminal UI, input, chips, live description
-    │   ├── ResultCard.tsx        # AI result card with flag breakdown
-    │   └── HistoryPanel.tsx      # Sidebar session history
-    │
-    ├── hooks/
-    │   └── useDockerPlayground.ts  # Core state management & API calls
-    │
-    ├── lib/
-    │   ├── ai/
-    │   │   ├── dockerValidator.py  # AI logic — flags, typos, scoring
-    │   │   └── index.py            # Flask HTTP server on :5001
-    │   │
-    │   └── db/
-    │       ├── storage.ts          # Storage abstraction layer
-    │       ├── mongodb/
-    │       │   ├── client.ts       # Mongoose connection (commented)
-    │       │   ├── schema.ts       # CommandHistory schema (commented)
-    │       │   └── repository.ts   # CRUD helpers (commented)
-    │       └── firebase/
-    │           ├── client.ts       # Firebase browser client (commented)
-    │           ├── admin.ts        # Firebase Admin SDK (commented)
-    │           └── repository.ts   # Firestore CRUD helpers (commented)
-    │
-    ├── styles/
-    │   └── globals.css           # All styles
-    │
-    └── types/
-        └── global.d.ts           # CSS module type declarations
+    └── src/
+        ├── app/
+        │   ├── layout.tsx            # Root HTML layout + fonts
+        │   ├── page.tsx              # Main page
+        │   └── api/
+        │       ├── validate/
+        │       │   └── route.ts      # POST /api/validate
+        │       └── history/
+        │           └── route.ts      # GET / DELETE /api/history
+        │
+        ├── components/
+        │   ├── Terminal.tsx          # Terminal UI, input, chips, live description
+        │   ├── ResultCard.tsx        # AI result card with flag breakdown
+        │   └── HistoryPanel.tsx      # Sidebar session history
+        │
+        ├── hooks/
+        │   └── useDockerPlayground.ts  # Core state management & API calls
+        │
+        ├── lib/
+        │   ├── ai/
+        │   │   ├── dockerValidator.py  # AI logic — flags, typos, scoring
+        │   │   └── index.py            # Flask + gunicorn HTTP server
+        │   │
+        │   └── db/
+        │       ├── storage.ts          # Storage abstraction layer
+        │       ├── mongodb/
+        │       │   ├── client.ts       # Mongoose connection (commented)
+        │       │   ├── schema.ts       # CommandHistory schema (commented)
+        │       │   └── repository.ts   # CRUD helpers (commented)
+        │       └── firebase/
+        │           ├── client.ts       # Firebase browser client (commented)
+        │           ├── admin.ts        # Firebase Admin SDK (commented)
+        │           └── repository.ts   # Firestore CRUD helpers (commented)
+        │
+        ├── styles/
+        │   └── globals.css           # All styles
+        │
+        └── types/
+            └── global.d.ts           # CSS module type declarations
 ```
 
 ---
@@ -125,7 +128,7 @@ For Docker deployment:
 
 ## Installation & Setup
 
-### Step 1 — Clone or extract the project
+### Step 1 — Go to the project folder
 
 ```bash
 cd D:\Docker-Playground\playsite
@@ -186,11 +189,11 @@ python src/lib/ai/index.py
 You should see:
 
 ```
-🐳 Docker AI service starting on http://localhost:5001
+Docker AI service starting on http://localhost:5001
 Press Ctrl+C to stop.
 ```
 
-Keep this terminal open. If you close it, validation will stop working.
+Keep this terminal open. If you close it, validation stops working.
 
 ### Terminal 2 — Start Next.js
 
@@ -202,7 +205,7 @@ npm run dev
 You should see:
 
 ```
-▲ Next.js 14.2.3
+▲ Next.js 16
 - Local: http://localhost:3000
 ✓ Ready in 2.2s
 ```
@@ -217,7 +220,7 @@ Go to **http://localhost:3000** in your browser.
 
 Run everything in a single Docker container — no separate terminals needed.
 
-### Step 1 — Make sure your Dockerfile is inside the playsite folder
+### Step 1 — Make sure Dockerfile is inside the playsite folder
 
 ```
 D:\Docker-Playground\playsite\
@@ -233,8 +236,6 @@ D:\Docker-Playground\playsite\
 cd D:\Docker-Playground\playsite
 docker build -t docker-playground .
 ```
-
-This will take a few minutes on first build (downloading base image, installing dependencies).
 
 ### Step 3 — Run the container
 
@@ -279,13 +280,14 @@ The Python service (`src/lib/ai/dockerValidator.py`) uses entirely local librari
 | NumPy | Cosine similarity for confidence scoring |
 | difflib | Fuzzy subcommand matching |
 | scikit-learn | Available for extension and vectorisation |
+| gunicorn | Production WSGI server (replaces Flask dev server) |
 
 ### Validation Pipeline
 
 When you submit a command, the following happens:
 
 1. The Next.js frontend sends `POST /api/validate` with the command string
-2. The Next.js API route forwards it to the Python Flask service at `http://localhost:5001/validate`
+2. The Next.js API route forwards it to the Python Flask service
 3. Python tokenises the command and strips the leading `docker` keyword
 4. The first token is checked against the known subcommand list
 5. If unrecognised, fuzzy matching suggests the closest valid subcommand
@@ -303,7 +305,7 @@ When you submit a command, the following happens:
 | Has positional args (image name etc.) | +15% |
 | Each typo found | -8% |
 
-A command is marked **valid** when the confidence is 45% or above and no typos are found.
+A command is marked **valid** when confidence is 45% or above and no typos are found.
 
 ---
 
@@ -423,7 +425,7 @@ MONGODB_URI=mongodb://localhost:27017/docker-playground
 2. Uncomment all code in `src/lib/db/mongodb/client.ts`
 3. Uncomment all code in `src/lib/db/mongodb/schema.ts`
 4. Uncomment all code in `src/lib/db/mongodb/repository.ts`
-5. In `src/lib/db/storage.ts`, uncomment the MongoDB import line and the three `mongoSave`, `mongoGet`, `mongoClear` calls
+5. In `src/lib/db/storage.ts` uncomment the MongoDB import and the three `mongoSave`, `mongoGet`, `mongoClear` calls
 
 ### Switching to Firebase
 
@@ -444,7 +446,7 @@ FIREBASE_ADMIN_PRIVATE_KEY=your_key
 2. Uncomment all code in `src/lib/db/firebase/client.ts`
 3. Uncomment all code in `src/lib/db/firebase/admin.ts`
 4. Uncomment all code in `src/lib/db/firebase/repository.ts`
-5. In `src/lib/db/storage.ts`, uncomment the Firebase import line and the three `firebaseSave`, `firebaseGet`, `firebaseClear` calls
+5. In `src/lib/db/storage.ts` uncomment the Firebase import and the three `firebaseSave`, `firebaseGet`, `firebaseClear` calls
 
 ---
 
@@ -464,6 +466,207 @@ FIREBASE_ADMIN_PRIVATE_KEY=your_key
 | `FIREBASE_ADMIN_PROJECT_ID` | — | Firebase Admin project ID |
 | `FIREBASE_ADMIN_CLIENT_EMAIL` | — | Firebase Admin client email |
 | `FIREBASE_ADMIN_PRIVATE_KEY` | — | Firebase Admin private key |
+
+---
+
+## Deployment on Render
+
+The app is deployed as **two separate web services** on Render:
+
+| Service | Runtime | URL |
+|---------|---------|-----|
+| Python AI | Python 3 + gunicorn | `https://docker-playground-pyai.onrender.com` |
+| Next.js Website | Node | `https://dockerplaygroundai.onrender.com` |
+
+---
+
+### Prerequisites
+
+- GitHub account with the project pushed to a repository
+- Render account at [render.com](https://render.com) connected to GitHub
+
+---
+
+### PART 1 — Deploy Python AI Service
+
+#### Step 1 — Verify `src/lib/ai/index.py`
+
+Make sure the port uses Render's `PORT` env variable:
+
+```python
+port = int(os.environ.get("PORT", 5001))
+```
+
+Make sure CORS is open:
+
+```python
+CORS(app, origins=["*"])
+```
+
+Make sure gunicorn is in `requirements.txt`:
+
+```
+flask>=3.0.0
+flask-cors>=4.0.0
+numpy>=1.26.0
+nltk>=3.8.1
+scikit-learn>=1.4.0
+gunicorn>=21.2.0
+```
+
+#### Step 2 — Push to GitHub
+
+```bash
+cd D:\Docker-Playground\playsite
+git add .
+git commit -m "ready for render deploy"
+git push
+```
+
+#### Step 3 — Create Python Web Service on Render
+
+1. Go to [render.com](https://render.com) and log in
+2. Click **New → Web Service**
+3. Connect your GitHub repository
+4. Fill in settings:
+
+| Field | Value |
+|-------|-------|
+| Name | `docker-ai-service` |
+| Runtime | `Python 3` |
+| Root Directory | `playsite` |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `gunicorn --chdir src/lib/ai index:app --bind 0.0.0.0:$PORT --workers 2` |
+| Instance Type | `Free` |
+
+5. Click **Create Web Service**
+6. Wait 2-3 minutes for deployment
+
+#### Step 4 — Test Python service
+
+Open in browser:
+```
+https://docker-ai-service.onrender.com/health
+```
+
+Expected response:
+```json
+{"status": "ok", "service": "docker-playground-ai"}
+```
+
+---
+
+### PART 2 — Deploy Next.js Web Service
+
+#### Step 5 — Verify `next.config.js`
+
+```js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+};
+module.exports = nextConfig;
+```
+
+#### Step 6 — Verify `package.json`
+
+```json
+{
+  "name": "docker-playground",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/uuid": "^9.0.8",
+    "gsap": "^3.12.5",
+    "next": "^16.2.2",
+    "react": "^18",
+    "react-dom": "^18",
+    "typescript": "^5",
+    "uuid": "^9.0.1"
+  }
+}
+```
+
+#### Step 7 — Push to GitHub
+
+```bash
+git add .
+git commit -m "nextjs render config"
+git push
+```
+
+#### Step 8 — Create Next.js Web Service on Render
+
+1. Click **New → Web Service**
+2. Connect the same GitHub repository
+3. Fill in settings:
+
+| Field | Value |
+|-------|-------|
+| Name | `docker-playground-web` |
+| Runtime | `Node` |
+| Root Directory | `playsite` |
+| Build Command | `npm install && NODE_OPTIONS=--max-old-space-size=512 npm run build` |
+| Start Command | `npm start` |
+| Instance Type | `Free` |
+
+4. Scroll to **Environment Variables** and add:
+
+| Key | Value |
+|-----|-------|
+| `PYTHON_AI_URL` | `https://docker-ai-service.onrender.com` |
+| `STORAGE_PROVIDER` | `local` |
+| `NODE_ENV` | `production` |
+| `PORT` | `3000` |
+| `HOSTNAME` | `0.0.0.0` |
+
+5. Click **Create Web Service**
+6. Wait 4-5 minutes
+
+#### Step 9 — Test the full site
+
+Open your Render URL and type a Docker command to validate.
+
+---
+
+### PART 3 — Keep Services Awake (Free Tier)
+
+Render free tier **sleeps after 15 minutes** of no traffic. The first request after sleep takes 30-40 seconds.
+
+To keep both services awake for free:
+
+1. Go to [uptimerobot.com](https://uptimerobot.com)
+2. Sign up free
+3. Add two monitors:
+
+| Monitor Name | URL | Interval |
+|-------------|-----|----------|
+| Docker AI | `https://docker-ai-service.onrender.com/health` | Every 10 mins |
+| Docker Web | `https://dockerplaygroundai.onrender.com` | Every 10 mins |
+
+---
+
+### Redeployment
+
+Every time you push to GitHub, both services **auto-redeploy**:
+
+```bash
+git add .
+git commit -m "your changes"
+git push
+```
+
+No manual steps needed after initial setup.
 
 ---
 
@@ -490,9 +693,17 @@ python src/lib/ai/index.py
 Error: Text content does not match server-rendered HTML
 ```
 
-**Cause:** Session ID was generated differently on server and client.
+**Cause:** Session ID generated differently on server and client.
 
-**Fix:** Already handled in `useDockerPlayground.ts` — sessionId is initialised with `""` and set client-side via `useEffect`.
+**Fix:** Already handled in `useDockerPlayground.ts` — sessionId initialises as `""` and is set client-side via `useEffect`.
+
+---
+
+### CSS not loading on deployed site
+
+**Cause:** Standalone output mode does not copy static files automatically.
+
+**Fix:** Remove `output: "standalone"` from `next.config.js` and set start command to `npm start`.
 
 ---
 
@@ -507,7 +718,64 @@ Cannot find module or type declarations for '@/styles/globals.css'
 declare module "*.css";
 ```
 
-Then restart the TypeScript server in VS Code: `Ctrl+Shift+P` → TypeScript: Restart TS Server.
+Then restart TypeScript server in VS Code: `Ctrl+Shift+P` → TypeScript: Restart TS Server.
+
+---
+
+### Module not found on Render build
+
+```
+Module not found: Can't resolve '@/components/Terminal'
+```
+
+**Cause:** `@/` path alias not resolving during Render build.
+
+**Fix:** Use relative imports in `src/app/page.tsx`:
+```tsx
+import Terminal from "../components/Terminal";
+import ResultCard from "../components/ResultCard";
+import HistoryPanel from "../components/HistoryPanel";
+import { useDockerPlayground } from "../hooks/useDockerPlayground";
+```
+
+And in API routes use `../../../lib/db/storage` instead of `@/lib/db/storage`.
+
+---
+
+### TypeScript not found on Render
+
+```
+Please install typescript and @types/react
+```
+
+**Fix:** Move TypeScript packages from `devDependencies` to `dependencies` in `package.json`.
+
+---
+
+### Build fails — unknown option --no-lint
+
+```
+error: unknown option '--no-lint'
+```
+
+**Fix:** Add this to `next.config.js` instead:
+```js
+const nextConfig = {
+  eslint: { ignoreDuringBuilds: true },
+};
+```
+
+---
+
+### Render build fails — requirements.txt not found
+
+```
+ERROR: Could not open requirements file: requirements.txt
+```
+
+**Cause:** Root Directory not set correctly on Render.
+
+**Fix:** In Render service Settings, set Root Directory to `playsite`.
 
 ---
 
@@ -517,11 +785,11 @@ Then restart the TypeScript server in VS Code: `Ctrl+Shift+P` → TypeScript: Re
 'python' is not recognized as an internal or external command
 ```
 
-**Fix:** Try one of:
+**Fix:**
 ```bash
 python3 src/lib/ai/index.py
+# or
 py src/lib/ai/index.py
-py -3 src/lib/ai/index.py
 ```
 
 ---
@@ -545,7 +813,7 @@ pip install --break-system-packages -r requirements.txt
 ERROR: failed to solve: "/requirements.txt": not found
 ```
 
-**Cause:** You ran `docker build` from the wrong folder.
+**Cause:** Running `docker build` from the wrong folder.
 
 **Fix:**
 ```bash
@@ -563,10 +831,7 @@ Error: listen EADDRINUSE: address already in use :::3000
 
 **Fix:**
 ```bash
-# Find what's using port 3000
 netstat -ano | findstr :3000
-
-# Kill it (replace PID with the number found above)
 taskkill /PID <PID> /F
 ```
 
@@ -580,15 +845,11 @@ netstat -ano | findstr :5001
 taskkill /PID <PID> /F
 ```
 
-Or change the port in `src/lib/ai/index.py`:
-```python
-port = int(os.environ.get("AI_PORT", 5002))  # change to any free port
-```
+---
 
-And update `.env.local`:
-```env
-PYTHON_AI_URL=http://localhost:5002
-```
+### npm audit vulnerabilities
+
+All remaining vulnerabilities after removing firebase/mongoose are inside eslint build tools only. They do not affect the running app and are safe to ignore.
 
 ---
 
@@ -605,10 +866,11 @@ PYTHON_AI_URL=http://localhost:5002
 | `src/components/HistoryPanel.tsx` | Sticky sidebar with session history list |
 | `src/hooks/useDockerPlayground.ts` | All state, API calls, history navigation |
 | `src/lib/ai/dockerValidator.py` | Core AI — knowledge base, tokeniser, typo detector, scorer |
-| `src/lib/ai/index.py` | Flask server exposing /validate and /health |
+| `src/lib/ai/index.py` | Flask + gunicorn server exposing /validate and /health |
 | `src/lib/db/storage.ts` | Abstraction over local/mongodb/firebase |
 | `src/styles/globals.css` | All CSS — variables, layout, terminal, cards, history |
 | `src/types/global.d.ts` | TypeScript declaration for CSS imports |
-| `requirements.txt` | Python packages: flask, flask-cors, numpy, nltk, scikit-learn |
+| `requirements.txt` | Python packages: flask, flask-cors, numpy, nltk, scikit-learn, gunicorn |
+| `next.config.js` | Next.js config — eslint disabled during builds |
 | `Dockerfile` | Single-stage Docker build for the full app |
 | `.env.example` | Template for environment variables |
