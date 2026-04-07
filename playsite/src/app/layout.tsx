@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Docker Playground — Command Validator",
   description: "Validate Docker commands and learn what every flag does",
   icons: {
-    icon: "/icon.svg",
+    icon: "/icon.png",
   },
 };
 
