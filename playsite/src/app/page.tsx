@@ -75,7 +75,7 @@ export default function Home() {
             <span className="badge-dot" />
             AI Powered
           </span>
-          <h1 className="header-title">Docker Playground</h1>
+          <h1 className="header-title">Docker Playground </h1>
           <p className="header-sub">
             Paste any Docker command — get a full breakdown of every flag, typo checks, and pro tips.
           </p>
