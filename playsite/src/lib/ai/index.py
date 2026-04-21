@@ -46,3 +46,10 @@ def validate():
         return jsonify(result)
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
+
+# ============================================
+# FIX FOR RENDER.COM 502 ERROR
+# ============================================
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
