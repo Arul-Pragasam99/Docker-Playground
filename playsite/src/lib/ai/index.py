@@ -1,6 +1,6 @@
 import sys
 import os
-import time  # ← ADD THIS LINE
+import time
 
 print("Python path:", sys.path)
 print("Starting Flask app...", flush=True)
@@ -75,6 +75,7 @@ def ready():
 def root():
     return jsonify({
         "service": "Docker Command Validator API",
+        "version": "1.0.0",
         "endpoints": {
             "health": "/health",
             "ready": "/ready", 
@@ -100,8 +101,13 @@ def validate():
         print(f"Validation error: {exc}", flush=True)
         return jsonify({"error": str(exc)}), 500
 
+# REMOVED keep-alive thread - UptimeRobot will handle this better
+# Self-pinging on free tier is unreliable and wastes resources
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     print(f"Starting server on port {port}...", flush=True)
+    print(f"Health check: http://localhost:{port}/health", flush=True)
+    print(f"Note: Use UptimeRobot to keep the service awake", flush=True)
     # Use threaded=False to save memory on free tier
     app.run(host="0.0.0.0", port=port, threaded=False, debug=False)
