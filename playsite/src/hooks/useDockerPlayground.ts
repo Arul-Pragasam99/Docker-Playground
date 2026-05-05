@@ -39,6 +39,14 @@ export function useDockerPlayground() {
 
   const commandBeforeNav = useRef("");
 
+  // Ping Python backend on load to wake it up (Render free tier sleeps)
+  useEffect(() => {
+    const pyUrl = process.env.NEXT_PUBLIC_PYTHON_AI_URL;
+    if (pyUrl) {
+      fetch(`${pyUrl}/health`).catch(() => {});
+    }
+  }, []);
+
   // Init sessionId on client only (avoids SSR/client hydration mismatch)
   useEffect(() => {
     const stored = sessionStorage.getItem("docker_session_id");
@@ -76,32 +84,54 @@ export function useDockerPlayground() {
     setResult(null);
     setHistoryIndex(-1);
 
-    try {
-      const res = await fetch("/api/validate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command: command.trim(), sessionId }),
-      });
+    const MAX_RETRIES = 3;
+    let lastError = "";
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Validation failed");
-      setResult(data);
-      await fetchHistory();
-    } catch (err: any) {
-      setResult({
-        valid: false,
-        command: command.trim(),
-        subcommand: "",
-        confidence: 0,
-        flags: [],
-        typos: [],
-        pro_tips: [],
-        summary: "",
-        error: err.message,
-      });
-    } finally {
-      setLoading(false);
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        if (attempt > 0) {
+          await new Promise(r => setTimeout(r, 2000 * attempt)); // 2s, 4s
+        }
+
+        const res = await fetch("/api/validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command: command.trim(), sessionId }),
+        });
+
+        const data = await res.json();
+
+        if (res.status === 503) {
+          lastError = data.error || "Service warming up...";
+          continue; // retry
+        }
+
+        if (!res.ok) throw new Error(data.error || "Validation failed");
+
+        setResult(data);
+        await fetchHistory();
+        setLoading(false);
+        return;
+
+      } catch (err: any) {
+        lastError = err.message;
+      }
     }
+
+    // All retries failed
+    setResult({
+      valid: false,
+      command: command.trim(),
+      subcommand: "",
+      confidence: 0,
+      flags: [],
+      typos: [],
+      pro_tips: [],
+      summary: "",
+      error: lastError || "Service unavailable. Please try again.",
+    });
+    setLoading(false);
+
   }, [command, loading, sessionId, fetchHistory]);
 
   const clearHistory = useCallback(async () => {

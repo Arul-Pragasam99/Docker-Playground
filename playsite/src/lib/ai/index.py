@@ -18,12 +18,10 @@ except ImportError:
     print("Flask not found. Install with: pip install flask flask-cors")
     sys.exit(1)
 
-# Fix NLTK download with proper error handling
 try:
     import nltk
     from nltk.metrics.distance import edit_distance
     
-    # Fix SSL issues for NLTK download (prevents certificate errors)
     import ssl
     try:
         _create_unverified_https_context = ssl._create_unverified_context
@@ -47,7 +45,6 @@ except Exception as e:
 
 app = Flask(__name__)
 
-# Better CORS configuration for Render
 CORS(app, resources={
     r"/*": {
         "origins": "*",
@@ -56,21 +53,18 @@ CORS(app, resources={
     }
 })
 
-# Health check endpoint (CRITICAL for Render)
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({
-        "status": "ok", 
+        "status": "ok",
         "service": "docker-playground-ai",
         "timestamp": time.time()
     })
 
-# Ready check endpoint (helps Render know when app is ready)
 @app.route("/ready", methods=["GET"])
 def ready():
     return jsonify({"status": "ready"}), 200
 
-# Root endpoint for testing
 @app.route("/", methods=["GET"])
 def root():
     return jsonify({
@@ -78,12 +72,11 @@ def root():
         "version": "1.0.0",
         "endpoints": {
             "health": "/health",
-            "ready": "/ready", 
+            "ready": "/ready",
             "validate": "/validate (POST)"
         }
     })
 
-# Validation endpoint
 @app.route("/validate", methods=["POST"])
 def validate():
     data = request.get_json(force=True, silent=True)
@@ -101,13 +94,9 @@ def validate():
         print(f"Validation error: {exc}", flush=True)
         return jsonify({"error": str(exc)}), 500
 
-# REMOVED keep-alive thread - UptimeRobot will handle this better
-# Self-pinging on free tier is unreliable and wastes resources
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     print(f"Starting server on port {port}...", flush=True)
     print(f"Health check: http://localhost:{port}/health", flush=True)
-    print(f"Note: Use UptimeRobot to keep the service awake", flush=True)
-    # Use threaded=False to save memory on free tier
-    app.run(host="0.0.0.0", port=port, threaded=False, debug=False)
+    app.run(host="0.0.0.0", port=port, threaded=True, debug=False)  # ← threaded=True

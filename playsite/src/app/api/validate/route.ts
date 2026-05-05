@@ -21,9 +21,16 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ command: trimmed }),
+      signal: AbortSignal.timeout(25000),
     });
 
     if (!aiResponse.ok) {
+      if (aiResponse.status === 429 || aiResponse.status === 503) {
+        return NextResponse.json(
+          { error: "AI service is warming up, please try again in a few seconds." },
+          { status: 503 }
+        );
+      }
       const errText = await aiResponse.text();
       throw new Error(`AI service error: ${errText}`);
     }
